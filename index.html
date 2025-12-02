@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox Link Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h2 { margin-top: 0; color: #333; }
+        p { color: #666; margin-bottom: 1.5rem; }
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: #0061fe; }
+        button {
+            background-color: #0061fe;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #004bb5; }
+        .result-area {
+            margin-top: 1.5rem;
+            display: none; /* Hidden until link is generated */
+            text-align: left;
+        }
+        .result-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .result-box {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            background-color: #28a745;
+            margin-top: 5px;
+        }
+        .copy-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Dropbox Link Generator</h2>
+    <p>Paste your raw Dropbox link below to get the Master Link.</p>
+    
+    <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/scl/fi/..." autofocus>
+    <button onclick="generateLink()">Generate Link</button>
+
+    <div class="result-area" id="resultArea">
+        <span class="result-label">Your Master Link:</span>
+        <div class="result-box" id="finalLink"></div>
+        <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+</div>
+
+<script>
+    function generateLink() {
+        const input = document.getElementById('dropboxLink').value.trim();
+        const resultArea = document.getElementById('resultArea');
+        const finalLinkBox = document.getElementById('finalLink');
+
+        if (!input) {
+            alert("Please paste a link first!");
+            return;
+        }
+
+        // The Magic Formula
+        const prefix = "https://crawby.github.io/pdf-reader/web/viewer.html?file=https://dropbox-guard.ccrawford.workers.dev?file=";
+        const encodedUrl = encodeURIComponent(input);
+        const finalUrl = prefix + encodedUrl;
+
+        // Show result
+        finalLinkBox.textContent = finalUrl;
+        resultArea.style.display = "block";
+    }
+
+    function copyToClipboard() {
+        const linkText = document.getElementById('finalLink').textContent;
+        navigator.clipboard.writeText(linkText).then(() => {
+            alert("Copied to clipboard!");
+        });
+    }
+    
+    // Allow pressing "Enter" to trigger the button
+    document.getElementById("dropboxLink").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            generateLink();
+        }
+    });
+</script>
+
+</body>
+</html>
