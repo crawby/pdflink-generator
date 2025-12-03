@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dropbox Link Generator</title>
+    <title>Secure PDF Link Generator</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -20,7 +20,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             text-align: center;
         }
         h2 { margin-top: 0; color: #333; }
@@ -47,6 +47,7 @@
             font-weight: bold;
             width: 100%;
             transition: background-color 0.2s;
+            margin-bottom: 10px;
         }
         button:hover { background-color: #004bb5; }
         .result-area {
@@ -71,22 +72,29 @@
             font-size: 14px;
             border: 1px solid #ddd;
             margin-bottom: 10px;
+            max-height: 100px;
+            overflow-y: auto;
         }
         .copy-btn {
             background-color: #28a745;
             margin-top: 5px;
         }
         .copy-btn:hover { background-color: #218838; }
+        .clear-btn {
+            background-color: #6c757d;
+        }
+        .clear-btn:hover { background-color: #5a6268; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Dropbox Link Generator</h2>
-    <p>Paste your raw Dropbox link below to get the Master Link.</p>
+    <h2>Secure PDF Link Generator</h2>
+    <p>Paste your raw Dropbox link to generate an obfuscated (Base64) Master Link.</p>
     
     <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/scl/fi/..." autofocus>
-    <button onclick="generateLink()">Generate Link</button>
+    <button onclick="generateLink()">Generate Secure Link</button>
+    <button class="clear-btn" onclick="clearField()">Clear</button>
 
     <div class="result-area" id="resultArea">
         <span class="result-label">Your Master Link:</span>
@@ -106,10 +114,23 @@
             return;
         }
 
-        // The Magic Formula
-        const prefix = "https://crawby.github.io/pdf-reader/web/viewer.html?file=https://dropbox-guard.ccrawford.workers.dev?file=";
-        const encodedUrl = encodeURIComponent(input);
-        const finalUrl = prefix + encodedUrl;
+        // 1. Define the URLs
+        const viewerUrl = "https://crawby.github.io/pdf-reader/web/viewer.html";
+        const workerUrl = "https://dropbox-guard.ccrawford.workers.dev/";
+
+        // 2. ENCODE: Turn the Dropbox link into Base64 gibberish
+        // btoa() is the built-in Javascript function for Base64 encoding
+        let base64Link;
+        try {
+            base64Link = btoa(input);
+        } catch (e) {
+            alert("Error encoding link. Make sure it doesn't contain special characters.");
+            return;
+        }
+
+        // 3. COMBINE: Viewer -> Worker -> Base64
+        // Note: We add ?file= to the worker URL so it knows what to decode
+        const finalUrl = `${viewerUrl}?file=${workerUrl}?file=${base64Link}`;
 
         // Show result
         finalLinkBox.textContent = finalUrl;
@@ -119,8 +140,14 @@
     function copyToClipboard() {
         const linkText = document.getElementById('finalLink').textContent;
         navigator.clipboard.writeText(linkText).then(() => {
-            alert("Copied to clipboard!");
+            // Visual feedback could go here
         });
+    }
+
+    function clearField() {
+        document.getElementById('dropboxLink').value = '';
+        document.getElementById('resultArea').style.display = 'none';
+        document.getElementById('dropboxLink').focus();
     }
     
     // Allow pressing "Enter" to trigger the button
