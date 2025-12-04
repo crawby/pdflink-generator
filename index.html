@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Link Tool</title>
-    <!-- Import a nice font from Google -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* 1. Base Styles & Centering */
+        /* --- Base Styles --- */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f4f6f8; /* Light grey background */
+            background-color: #f4f6f8;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,7 +18,6 @@
             color: #333;
         }
 
-        /* 2. The "Card" Container */
         .card {
             background: white;
             padding: 40px;
@@ -33,24 +31,21 @@
         h1 { margin-top: 0; font-size: 24px; color: #111; }
         p { color: #666; margin-bottom: 25px; }
 
-        /* 3. Input Styling */
+        /* --- Inputs & Main Button --- */
         input {
             width: 100%;
             padding: 14px;
             font-size: 16px;
             border: 2px solid #e1e1e1;
             border-radius: 8px;
-            box-sizing: border-box; /* Keeps padding inside width */
+            box-sizing: border-box;
             transition: border-color 0.2s;
             outline: none;
             margin-bottom: 15px;
         }
-        input:focus {
-            border-color: #0061fe;
-        }
+        input:focus { border-color: #0061fe; }
 
-        /* 4. Button Styling */
-        button {
+        .generate-btn {
             width: 100%;
             padding: 14px;
             font-size: 16px;
@@ -62,10 +57,10 @@
             border-radius: 8px;
             transition: background 0.2s, transform 0.1s;
         }
-        button:hover { background: #004bb5; }
-        button:active { transform: scale(0.98); }
+        .generate-btn:hover { background: #004bb5; }
+        .generate-btn:active { transform: scale(0.98); }
 
-        /* 5. Results Section */
+        /* --- Results Section --- */
         #results {
             margin-top: 30px;
             text-align: left;
@@ -80,24 +75,48 @@
             letter-spacing: 1px;
             color: #888;
             font-weight: 600;
-            margin-top: 15px;
+            margin-top: 20px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+        }
+
+        /* Wrapper to hold the code box and the copy button together */
+        .result-wrapper {
+            position: relative;
         }
 
         .code-box {
             background: #f8f9fa;
             padding: 15px;
+            padding-right: 80px; /* Make room for the button */
             border: 1px solid #e1e1e1;
             border-radius: 6px;
             font-family: 'Monaco', 'Consolas', monospace;
             font-size: 13px;
             color: #444;
             word-break: break-all;
-            position: relative;
+            min-height: 20px;
         }
 
-        /* Simple fade in animation */
+        /* --- Copy Button Styles --- */
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: white;
+            border: 1px solid #ccc;
+            color: #333;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: #eee;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -111,14 +130,22 @@
         <p>Paste your Dropbox link below to generate the viewer code.</p>
 
         <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/..." autofocus>
-        <button onclick="generateLink()">Generate Code</button>
+        <button class="generate-btn" onclick="generateLink()">Generate Code</button>
 
         <div id="results" style="display:none;">
+            
             <label>Master Link (Test this first)</label>
-            <div class="code-box" id="finalLink"></div>
+            <div class="result-wrapper">
+                <div class="code-box" id="finalLink"></div>
+                <button class="copy-btn" onclick="copyToClipboard('finalLink', this)">Copy</button>
+            </div>
 
-            <label>LibGuide Embed Code (Copy this)</label>
-            <div class="code-box" id="embedCode"></div>
+            <label>LibGuide Embed Code</label>
+            <div class="result-wrapper">
+                <div class="code-box" id="embedCode"></div>
+                <button class="copy-btn" onclick="copyToClipboard('embedCode', this)">Copy</button>
+            </div>
+
         </div>
     </div>
 
@@ -135,7 +162,7 @@
 
             let base64Link;
             try { 
-                // Safer encoding for special characters
+                // Safe encoding for special characters
                 base64Link = btoa(encodeURIComponent(input).replace(/%([0-9A-F]{2})/g,
                     function toSolidBytes(match, p1) {
                         return String.fromCharCode('0x' + p1);
@@ -161,6 +188,30 @@
             document.getElementById('finalLink').textContent = finalUrl;
             document.getElementById('embedCode').textContent = embedHtml;
             document.getElementById('results').style.display = 'block';
+        }
+
+        // --- Copy Functionality ---
+        function copyToClipboard(elementId, btnElement) {
+            const textToCopy = document.getElementById(elementId).textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Success feedback
+                const originalText = btnElement.textContent;
+                btnElement.textContent = "Copied!";
+                btnElement.style.background = "#d1e7dd"; // Light green
+                btnElement.style.borderColor = "#badbcc";
+                btnElement.style.color = "#0f5132";
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    btnElement.textContent = originalText;
+                    btnElement.style.background = "white";
+                    btnElement.style.borderColor = "#ccc";
+                    btnElement.style.color = "#333";
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
         }
     </script>
 
