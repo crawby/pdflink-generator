@@ -1,52 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LibGuide PDF Tool</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 700px; text-align: center; }
-        h2 { margin-top: 0; color: #333; }
-        p { color: #666; margin-bottom: 1.5rem; }
-        input[type="text"] { width: 95%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 1rem; outline: none; }
-        input[type="text"]:focus { border-color: #0061fe; }
-        button { background-color: #0061fe; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
-        button:hover { background-color: #004bb5; }
-        .result-area { margin-top: 1.5rem; display: none; text-align: left; border-top: 1px solid #eee; padding-top: 20px; }
-        .result-group { margin-bottom: 20px; }
-        .result-label { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .result-box { background: #f8f9fa; padding: 12px; border-radius: 6px; word-break: break-all; font-family: monospace; font-size: 13px; border: 1px solid #ddd; margin-bottom: 8px; max-height: 120px; overflow-y: auto; white-space: pre-wrap; }
-        .copy-btn { background-color: #28a745; width: auto; padding: 8px 16px; font-size: 14px; }
-        .copy-btn:hover { background-color: #218838; }
-        .clear-btn { background-color: #6c757d; }
-        .clear-btn:hover { background-color: #5a6268; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h2>LibGuide PDF Generator</h2>
-    <p>Paste a raw Dropbox link to generate the secure Viewer Link and the LibGuide HTML Embed Code.</p>
-    
-    <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/scl/fi/..." autofocus>
-    <button onclick="generateLink()">Generate Code</button>
-    <button class="clear-btn" onclick="clearField()">Clear</button>
-
-    <div class="result-area" id="resultArea">
-        <div class="result-group">
-            <span class="result-label">Master Link (For testing):</span>
-            <div class="result-box" id="finalLink"></div>
-            <button class="copy-btn" onclick="copyToClipboard('finalLink')">Copy Link</button>
-        </div>
-        <div class="result-group">
-            <span class="result-label">LibGuide HTML Embed Code:</span>
-            <div class="result-box" id="embedCode"></div>
-            <button class="copy-btn" onclick="copyToClipboard('embedCode')">Copy HTML</button>
-        </div>
-    </div>
-</div>
-
 <script>
     function generateLink() {
         const input = document.getElementById('dropboxLink').value.trim();
@@ -65,10 +16,11 @@
         try { base64Link = btoa(input); } 
         catch (e) { alert("Error encoding link."); return; }
 
-        // Create Master URL
+        // Create Master URL (Simple version, no &ref= needed)
         const finalUrl = `${viewerUrl}?file=${workerUrl}?file=${base64Link}`;
 
         // Create Embed HTML
+        // Note: referrerpolicy="origin" is CRITICAL for the Bouncer to work
         const embedHtml = `<!-- Mobile Friendly Link -->
 <div style="text-align: right; margin-bottom: 8px;">
     <a href="${finalUrl}" 
@@ -95,26 +47,5 @@
         embedCodeBox.textContent = embedHtml;
         resultArea.style.display = "block";
     }
-
-    function copyToClipboard(elementId) {
-        const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector(`button[onclick="copyToClipboard('${elementId}')"]`);
-            const originalText = btn.textContent;
-            btn.textContent = "Copied!";
-            setTimeout(() => btn.textContent = originalText, 1500);
-        });
-    }
-
-    function clearField() {
-        document.getElementById('dropboxLink').value = '';
-        document.getElementById('resultArea').style.display = 'none';
-        document.getElementById('dropboxLink').focus();
-    }
-    
-    document.getElementById("dropboxLink").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") generateLink();
-    });
+    // ... (Keep copyToClipboard and clearField functions) ...
 </script>
-</body>
-</html>
