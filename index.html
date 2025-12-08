@@ -15,6 +15,8 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
             color: #333;
         }
 
@@ -24,7 +26,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             text-align: center;
         }
 
@@ -32,7 +34,7 @@
         p { color: #666; margin-bottom: 25px; }
 
         /* --- Inputs & Main Button --- */
-        input {
+        input, textarea {
             width: 100%;
             padding: 14px;
             font-size: 16px;
@@ -42,8 +44,22 @@
             transition: border-color 0.2s;
             outline: none;
             margin-bottom: 15px;
+            font-family: 'Inter', sans-serif;
         }
-        input:focus { border-color: #0061fe; }
+        input:focus, textarea:focus { border-color: #0061fe; }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #888;
+            text-align: left;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
 
         .generate-btn {
             width: 100%;
@@ -79,6 +95,10 @@
             display: block;
             margin-bottom: 8px;
         }
+        
+        label:first-of-type {
+            margin-top: 0;
+        }
 
         /* Wrapper to hold the code box and the copy button together */
         .result-wrapper {
@@ -88,7 +108,7 @@
         .code-box {
             background: #f8f9fa;
             padding: 15px;
-            padding-right: 80px; /* Make room for the button */
+            padding-right: 80px;
             border: 1px solid #e1e1e1;
             border-radius: 6px;
             font-family: 'Monaco', 'Consolas', monospace;
@@ -96,6 +116,9 @@
             color: #444;
             word-break: break-all;
             min-height: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
 
         /* --- Copy Button Styles --- */
@@ -117,6 +140,36 @@
             background: #eee;
         }
 
+        /* --- Section Divider --- */
+        .section-divider {
+            margin: 25px 0;
+            border-top: 2px dashed #ddd;
+            position: relative;
+        }
+        .section-divider span {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 12px;
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- First-time CSS notice --- */
+        .css-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #856404;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -130,6 +183,10 @@
         <p>Paste your Dropbox link below to generate the viewer code.</p>
 
         <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/..." autofocus>
+        
+        <textarea id="citation" placeholder="Author, Name. Book Title. Place: Publisher, Year."></textarea>
+        <div class="input-hint">Optional: Add citation for accordion-style output (HTML like &lt;em&gt; allowed)</div>
+        
         <button class="generate-btn" onclick="generateLink()">Generate Code</button>
 
         <div id="results" style="display:none;">
@@ -140,10 +197,28 @@
                 <button class="copy-btn" onclick="copyToClipboard('finalLink', this)">Copy</button>
             </div>
 
-            <label>LibGuide Embed Code</label>
+            <label>Standard Embed Code</label>
             <div class="result-wrapper">
                 <div class="code-box" id="embedCode"></div>
                 <button class="copy-btn" onclick="copyToClipboard('embedCode', this)">Copy</button>
+            </div>
+
+            <div class="section-divider"><span>Accordion Style</span></div>
+
+            <div class="css-notice" id="cssNotice">
+                ⚠️ <strong>First time?</strong> Copy the CSS below into your LibGuide's Custom CSS section (Guide > Guide Settings > Custom CSS/JS). You only need to do this once per guide.
+            </div>
+
+            <label>Accordion CSS (Add once per guide)</label>
+            <div class="result-wrapper">
+                <div class="code-box" id="accordionCss"></div>
+                <button class="copy-btn" onclick="copyToClipboard('accordionCss', this)">Copy</button>
+            </div>
+
+            <label>Accordion HTML (Add for each book)</label>
+            <div class="result-wrapper">
+                <div class="code-box" id="accordionHtml"></div>
+                <button class="copy-btn" onclick="copyToClipboard('accordionHtml', this)">Copy</button>
             </div>
 
         </div>
@@ -152,6 +227,7 @@
     <script>
         function generateLink() {
             const input = document.getElementById('dropboxLink').value.trim();
+            const citation = document.getElementById('citation').value.trim() || 'Author, Name. <em>Book Title</em>. Year.';
             
             // --- YOUR SETTINGS ---
             const viewerUrl = "https://crawby.github.io/pdf-reader/web/viewer.html";
@@ -162,7 +238,6 @@
 
             let base64Link;
             try { 
-                // Safe encoding for special characters
                 base64Link = btoa(encodeURIComponent(input).replace(/%([0-9A-F]{2})/g,
                     function toSolidBytes(match, p1) {
                         return String.fromCharCode('0x' + p1);
@@ -174,7 +249,7 @@
             // 1. Create the URL
             const finalUrl = `${viewerUrl}?file=${workerUrl}?file=${base64Link}`;
 
-            // 2. Create the HTML
+            // 2. Create the standard HTML
             const embedHtml = `<!-- Mobile Friendly Link -->
 <div style="text-align: right; margin-bottom: 8px;">
     <a href="${finalUrl}" target="_blank" referrerpolicy="origin" style="text-decoration: none; color: #333; font-family: sans-serif; font-size: 0.9em; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; background-color: #f9f9f9;">
@@ -184,9 +259,48 @@
 <!-- The PDF Reader -->
 <iframe src="${finalUrl}" width="100%" height="900" style="border: 1px solid #ccc; border-radius: 4px;" referrerpolicy="origin" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>`;
 
-            // 3. Show Results
+            // 3. Create the Accordion CSS
+            const accordionCss = `<style>
+.book-accordion { margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
+.book-header { background-color: #f9f9f9; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; transition: background-color 0.2s; }
+.book-header:hover { background-color: #f0f0f0; }
+.book-header .citation { flex: 1; }
+.book-header .toggle-icon { font-size: 1.2em; transition: transform 0.3s; margin-left: 12px; }
+.book-accordion.open .toggle-icon { transform: rotate(180deg); }
+.book-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+.book-accordion.open .book-content { max-height: 1000px; }
+.book-content-inner { padding: 12px; background: #fff; }
+.fullscreen-link { text-align: right; margin-bottom: 8px; }
+.fullscreen-link a { text-decoration: none; color: #333; font-family: sans-serif; font-size: 0.9em; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; background-color: #f9f9f9; }
+.fullscreen-link a:hover { background-color: #eee; }
+</style>
+<script>
+function toggleAccordion(header) { header.parentElement.classList.toggle('open'); }
+<\/script>`;
+
+            // 4. Create the Accordion HTML
+            const accordionHtml = `<div class="book-accordion">
+    <div class="book-header" onclick="toggleAccordion(this)">
+        <div class="citation">${citation}</div>
+        <span class="toggle-icon">▼</span>
+    </div>
+    <div class="book-content">
+        <div class="book-content-inner">
+            <div class="fullscreen-link">
+                <a href="${finalUrl}" target="_blank" referrerpolicy="origin">
+                    <span style="margin-right: 4px;">↗</span> Open Full Screen
+                </a>
+            </div>
+            <iframe src="${finalUrl}" width="100%" height="700" style="border: 1px solid #ccc; border-radius: 4px;" referrerpolicy="origin" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>`;
+
+            // 5. Show Results
             document.getElementById('finalLink').textContent = finalUrl;
             document.getElementById('embedCode').textContent = embedHtml;
+            document.getElementById('accordionCss').textContent = accordionCss;
+            document.getElementById('accordionHtml').textContent = accordionHtml;
             document.getElementById('results').style.display = 'block';
         }
 
@@ -195,14 +309,12 @@
             const textToCopy = document.getElementById(elementId).textContent;
             
             navigator.clipboard.writeText(textToCopy).then(() => {
-                // Success feedback
                 const originalText = btnElement.textContent;
                 btnElement.textContent = "Copied!";
-                btnElement.style.background = "#d1e7dd"; // Light green
+                btnElement.style.background = "#d1e7dd";
                 btnElement.style.borderColor = "#badbcc";
                 btnElement.style.color = "#0f5132";
 
-                // Reset after 2 seconds
                 setTimeout(() => {
                     btnElement.textContent = originalText;
                     btnElement.style.background = "white";
