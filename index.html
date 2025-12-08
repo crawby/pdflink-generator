@@ -100,7 +100,6 @@
             margin-top: 0;
         }
 
-        /* Wrapper to hold the code box and the copy button together */
         .result-wrapper {
             position: relative;
         }
@@ -121,7 +120,6 @@
             white-space: pre-wrap;
         }
 
-        /* --- Copy Button Styles --- */
         .copy-btn {
             position: absolute;
             top: 5px;
@@ -140,7 +138,6 @@
             background: #eee;
         }
 
-        /* --- Section Divider --- */
         .section-divider {
             margin: 25px 0;
             border-top: 2px dashed #ddd;
@@ -157,17 +154,6 @@
             color: #999;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
-        /* --- First-time CSS notice --- */
-        .css-notice {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #856404;
         }
 
         @keyframes fadeIn {
@@ -205,20 +191,10 @@
 
             <div class="section-divider"><span>Accordion Style</span></div>
 
-            <div class="css-notice" id="cssNotice">
-                ⚠️ <strong>First time?</strong> Copy the CSS below into your LibGuide's Custom CSS section (Guide > Guide Settings > Custom CSS/JS). You only need to do this once per guide.
-            </div>
-
-            <label>Accordion CSS (Add once per guide)</label>
+            <label>Accordion Code (Self-contained)</label>
             <div class="result-wrapper">
-                <div class="code-box" id="accordionCss"></div>
-                <button class="copy-btn" onclick="copyToClipboard('accordionCss', this)">Copy</button>
-            </div>
-
-            <label>Accordion HTML (Add for each book)</label>
-            <div class="result-wrapper">
-                <div class="code-box" id="accordionHtml"></div>
-                <button class="copy-btn" onclick="copyToClipboard('accordionHtml', this)">Copy</button>
+                <div class="code-box" id="accordionCode"></div>
+                <button class="copy-btn" onclick="copyToClipboard('accordionCode', this)">Copy</button>
             </div>
 
         </div>
@@ -259,8 +235,8 @@
 <!-- The PDF Reader -->
 <iframe src="${finalUrl}" width="100%" height="900" style="border: 1px solid #ccc; border-radius: 4px;" referrerpolicy="origin" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>`;
 
-            // 3. Create the Accordion CSS
-            const accordionCss = `<style>
+            // 3. Create the self-contained Accordion Code
+            const accordionCode = `<style>
 .book-accordion { margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
 .book-header { background-color: #f9f9f9; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; transition: background-color 0.2s; }
 .book-header:hover { background-color: #f0f0f0; }
@@ -274,13 +250,9 @@
 .fullscreen-link a { text-decoration: none; color: #333; font-family: sans-serif; font-size: 0.9em; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; background-color: #f9f9f9; }
 .fullscreen-link a:hover { background-color: #eee; }
 </style>
-<script>
-function toggleAccordion(header) { header.parentElement.classList.toggle('open'); }
-<\/script>`;
 
-            // 4. Create the Accordion HTML
-            const accordionHtml = `<div class="book-accordion">
-    <div class="book-header" onclick="toggleAccordion(this)">
+<div class="book-accordion">
+    <div class="book-header" onclick="this.parentElement.classList.toggle('open')">
         <div class="citation">${citation}</div>
         <span class="toggle-icon">▼</span>
     </div>
@@ -296,11 +268,10 @@ function toggleAccordion(header) { header.parentElement.classList.toggle('open')
     </div>
 </div>`;
 
-            // 5. Show Results
+            // 4. Show Results
             document.getElementById('finalLink').textContent = finalUrl;
             document.getElementById('embedCode').textContent = embedHtml;
-            document.getElementById('accordionCss').textContent = accordionCss;
-            document.getElementById('accordionHtml').textContent = accordionHtml;
+            document.getElementById('accordionCode').textContent = accordionCode;
             document.getElementById('results').style.display = 'block';
         }
 
