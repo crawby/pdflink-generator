@@ -241,8 +241,8 @@
 .book-header { background-color: #f9f9f9; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; transition: background-color 0.2s; }
 .book-header:hover { background-color: #f0f0f0; }
 .book-header .citation { flex: 1; }
-.book-header .toggle-icon { font-size: 1.2em; transition: transform 0.3s; margin-left: 12px; }
-.book-accordion.open .toggle-icon { transform: rotate(180deg); }
+.book-header .toggle-text { font-size: 0.85em; color: #666; margin-left: 12px; padding: 4px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; white-space: nowrap; }
+.book-header:hover .toggle-text { background: #eee; }
 .book-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
 .book-accordion.open .book-content { max-height: 1000px; }
 .book-content-inner { padding: 12px; background: #fff; }
@@ -252,9 +252,9 @@
 </style>
 
 <div class="book-accordion">
-    <div class="book-header" onclick="this.parentElement.classList.toggle('open')">
+    <div class="book-header" onclick="var a=this.parentElement,t=this.querySelector('.toggle-text');a.classList.toggle('open');t.textContent=a.classList.contains('open')?'Collapse':'Expand';">
         <div class="citation">${citation}</div>
-        <span class="toggle-icon">▼</span>
+        <span class="toggle-text">Expand</span>
     </div>
     <div class="book-content">
         <div class="book-content-inner">
@@ -300,3 +300,4 @@
 
 </body>
 </html>
+```
