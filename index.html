@@ -165,7 +165,7 @@
 <body>
 
     <div class="card">
-        <h1>LibGuide PDF Generator</h1>
+        <h1>LibGuide PDF Generator (20% Limit)</h1>
         <p>Paste your Dropbox link below to generate the viewer code.</p>
 
         <input type="text" id="dropboxLink" placeholder="https://www.dropbox.com/..." autofocus>
@@ -226,16 +226,18 @@
             const finalUrl = `${viewerUrl}?file=${workerUrl}?file=${base64Link}`;
 
             // 2. Create the standard HTML
+            // UPDATED: Changed text to "Open Preview"
             const embedHtml = `<!-- Mobile Friendly Link -->
 <div style="text-align: right; margin-bottom: 8px;">
     <a href="${finalUrl}" target="_blank" referrerpolicy="origin" style="text-decoration: none; color: #333; font-family: sans-serif; font-size: 0.9em; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; background-color: #f9f9f9;">
-        <span style="font-size: 1.1em; margin-right: 4px;">&#x2197;</span> Open Full Screen
+        <span style="font-size: 1.1em; margin-right: 4px;">&#x2197;</span> Open Preview (20%)
     </a>
 </div>
 <!-- The PDF Reader -->
 <iframe src="${finalUrl}" width="100%" height="900" style="border: 1px solid #ccc; border-radius: 4px;" referrerpolicy="origin" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>`;
 
             // 3. Create the self-contained Accordion Code
+            // UPDATED: Changed toggle text and link text to reflect "Preview"
             const accordionCode = `<style>
 .book-accordion { margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
 .book-header { background-color: #f9f9f9; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif; transition: background-color 0.2s; }
@@ -252,15 +254,15 @@
 </style>
 
 <div class="book-accordion">
-    <div class="book-header" onclick="var a=this.parentElement,t=this.querySelector('.toggle-text');a.classList.toggle('open');t.textContent=a.classList.contains('open')?'Collapse':'Expand';">
+    <div class="book-header" onclick="var a=this.parentElement,t=this.querySelector('.toggle-text');a.classList.toggle('open');t.textContent=a.classList.contains('open')?'Collapse':'Preview';">
         <div class="citation">${citation}</div>
-        <span class="toggle-text">Expand</span>
+        <span class="toggle-text">Preview</span>
     </div>
     <div class="book-content">
         <div class="book-content-inner">
             <div class="fullscreen-link">
                 <a href="${finalUrl}" target="_blank" referrerpolicy="origin">
-                    <span style="margin-right: 4px;">↗</span> Open Full Screen
+                    <span style="margin-right: 4px;">↗</span> Open Preview (20%)
                 </a>
             </div>
             <iframe src="${finalUrl}" width="100%" height="700" style="border: 1px solid #ccc; border-radius: 4px;" referrerpolicy="origin" allowfullscreen></iframe>
@@ -300,4 +302,3 @@
 
 </body>
 </html>
-```
